@@ -19,10 +19,61 @@
   </head>
   <body>
     <div class="container">
-      <h1>Dia-Dia</h1>
-      <section class="card">
+      <span class="input-group-text mt-1 mb-1"><h1>Dia-Dia 🌞</h1></span>
+      <section class="">
         <div>
-          <table class="table table-striped table-hover mb-0">
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Data</span>
+            </div>
+            <input type="text" class="form-control" aria-label="ID" aria-describedby="inputGroup-sizing-sm" id="ID" hidden>
+            <input type="date" class="form-control" aria-label="Data" aria-describedby="inputGroup-sizing-sm" id="data" >
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Lembrete</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Lembrete" aria-describedby="inputGroup-sizing-sm" id="lembrete">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Treino</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Treino" aria-describedby="inputGroup-sizing-sm" id="treino">
+          </div>
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">A Fazer</span>
+            </div>
+            <input type="text" class="form-control" aria-label="A Fazer" aria-describedby="inputGroup-sizing-sm" id="afazer">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Leu Hoje?</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Leu Hoje?" aria-describedby="inputGroup-sizing-sm" id="leuhoje">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Inglês?</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Inglês?" aria-describedby="inputGroup-sizing-sm" id="ingles">
+          </div>
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Tirou foto?</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Tirou foto?" aria-describedby="inputGroup-sizing-sm" id="tiroufoto">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Creatina?</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Creatina?" aria-describedby="inputGroup-sizing-sm" id="creatina">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Lendo livro?</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Lendo livro?" aria-describedby="inputGroup-sizing-sm" id="lendolivro">
+          </div>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Relato do dia</span>
+            </div>
+            <textarea class="form-control" aria-label="Relato do dia" id="relato"></textarea>
+            <button type="button" class="btn btn-secondary ml-2" id="cadastrar">Cadastrar</button>
+          </div>
+          
+          <table class="table table-striped table-hover mb-0 mt-2">
             <thead>
               <tr>
                 <td>Data</td>
@@ -37,28 +88,16 @@
                 <td>Lendo</td>
               </tr>
             </thead>
-            <tbody>
-              {{range .}}
-              <tr>
-                <input type="hidden" name="id" value={{.ID}}>
-                <td>{{.Data}}</td>
-                <td>{{.Lembrete}}</td>
-                <td>{{.RelatoDoDia}}</td>
-                <td>{{.Treino}}</td>
-                <td>{{.AFazer}}</td>
-                <td>{{.LeuHoje}}</td>
-                <td>{{.Ingles}}</td>
-                <td>{{.TirouFoto}}</td>
-                <td>{{.Creatina}}</td>
-                <td>{{.Lendo}}</td>
-                <td><a href="#">Editar</a></td>
-              </tr>
-              {{ end }}
+            <tbody id="table-body">
+              
             </tbody>
           </table>
+          
         </div>
       </section>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script src="../../javascript/script.js"></script>
   </body>
 </html>

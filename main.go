@@ -8,41 +8,41 @@ import (
 	"log"
 	"net/http"
 	_ "github.com/lib/pq"
+    "github.com/rs/cors"
 )
 
 type Registro struct {
     ID, Data, Lembrete, RelatoDoDia, Treino, AFazer, LeuHoje, Ingles, TirouFoto, Creatina, Lendo string
 }
 
+type DadosDiarios struct {
+    Data       string `json:"data"`
+    Lembrete   string `json:"lembrete"`
+    RelatoDoDia string `json:"relato_do_dia"`
+    Treino      string `json:"treino"`
+    AFazer     string `json:"a_fazer"`
+    LeuHoje     string `json:"leu_hoje"`
+    Ingles      string `json:"ingles"`
+    TirouFoto  string `json:"tirou_foto"`
+    Creatina   string `json:"creatina"`
+    Lendo       string `json:"lendo"`
+    ID         int    `json:"id"`
+}
+
 func main() {
     fmt.Println("Serve is running on http://localhost:8080/ 🚀")
-    http.HandleFunc("/registros", pegaRegistrosDoBanco)     //GET /registros
-    http.HandleFunc("/inserir_registro", inserirRegistro)   //POST /inserir_registro
-    http.HandleFunc("/update_registro", editRegistro)       //POST /update_registro
-    http.HandleFunc("/delete", deleteRegistro)              //POST /delete
-    http.ListenAndServe(":8080", nil)                       // Inicia o servidor na porta 8080
+    mux := http.NewServeMux()
+    handler := cors.Default().Handler(mux)
+
+    mux.HandleFunc("/registros", pegaRegistrosDoBanco)     //GET /registros
+    mux.HandleFunc("/inserir_registro", inserirRegistro)   //POST /inserir_registro
+    mux.HandleFunc("/update_registro", editRegistro)       //POST /update_registro
+    mux.HandleFunc("/delete", deleteRegistro)              //POST /delete
+    http.ListenAndServe(":8080", handler)                       // Inicia o servidor na porta 8080
 }
 
 func pegaRegistrosDoBanco(w http.ResponseWriter, r *http.Request) {
-    registros := pegaRegistros()
-
-    // Escrever o cabeçalho da resposta
-    w.WriteHeader(http.StatusOK)
-
-    // Definir o tipo de conteúdo da resposta como JSON
-    w.Header().Set("Content-Type", "application/json")
-
-    // Codificar os registros em JSON e escrever na resposta
-    json, err := json.Marshal(registros)
-    if err != nil {
-        fmt.Fprintf(w, "Erro ao codificar os registros em JSON: %v", err)
-        return
-    }
-    w.Write(json)
-}
-
-func pegaRegistros() []Registro {
-	db, err := sql.Open("postgres", "postgres://postgres:689df2c8@localhost:5432/Registros?sslmode=disable")
+    db, err := sql.Open("postgres", "postgres://postgres:689df2c8@localhost:5432/Registros?sslmode=disable")
     if err != nil {
         log.Fatal(err)
     }
@@ -64,21 +64,20 @@ func pegaRegistros() []Registro {
         }
         registros = append(registros, registro)
     }
-    return registros
-}
 
-type DadosDiarios struct {
-    Data       string `json:"data"`
-    Lembrete   string `json:"lembrete"`
-    RelatoDoDia string `json:"relato_do_dia"`
-    Treino      string `json:"treino"`
-    AFazer     string `json:"a_fazer"`
-    LeuHoje     string `json:"leu_hoje"`
-    Ingles      string `json:"ingles"`
-    TirouFoto  string `json:"tirou_foto"`
-    Creatina   string `json:"creatina"`
-    Lendo       string `json:"lendo"`
-    ID         int    `json:"id"`
+    // Escrever o cabeçalho da resposta
+    w.WriteHeader(http.StatusOK)
+
+    // Definir o tipo de conteúdo da resposta como JSON
+    w.Header().Set("Content-Type", "application/json")
+
+    // Codificar os registros em JSON e escrever na resposta
+    json, err := json.Marshal(registros)
+    if err != nil {
+        fmt.Fprintf(w, "Erro ao codificar os registros em JSON: %v", err)
+        return
+    }
+    w.Write(json)
 }
 
 func inserirRegistro(w http.ResponseWriter, r *http.Request){
@@ -96,7 +95,6 @@ if err != nil {
     fmt.Fprintf(w, "Erro ao decodificar o corpo da requisição: %v", err)
     return
 }
-
 // Retornar o status 201 Created
 w.WriteHeader(http.StatusCreated)
 
@@ -114,7 +112,6 @@ if err != nil {
 defer stmt.Close()
 
 // Substituir os valores na instrução SQL
-
 data := dados.Data
 lembrete := dados.Lembrete
 relatoDoDia := dados.RelatoDoDia
@@ -133,7 +130,6 @@ _, err = stmt.Exec(data, lembrete, relatoDoDia, treino, aFazer, leuHoje, ingles,
 if err != nil {
     log.Fatal(err)
 }
-
 fmt.Println("Registro inserido com sucesso!")
 }
 
@@ -231,3 +227,4 @@ if err != nil {
     log.Fatal(err)
     }
 }
+
