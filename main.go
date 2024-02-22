@@ -15,36 +15,30 @@ type Registro struct {
 }
 
 func main() {
-	
     fmt.Println("Serve is running on http://localhost:8080/ 🚀")
+    http.HandleFunc("/registros", pegaRegistrosDoBanco)     //GET /registros
+    http.HandleFunc("/inserir_registro", inserirRegistro)   //POST /inserir_registro
+    http.HandleFunc("/update_registro", editRegistro)       //POST /update_registro
+    http.HandleFunc("/delete", deleteRegistro)              //POST /delete
+    http.ListenAndServe(":8080", nil)                       // Inicia o servidor na porta 8080
+}
 
-    // Função para manipular a requisição "/"
-    http.HandleFunc("/registros", func(w http.ResponseWriter, r *http.Request) {
-        registros := pegaRegistros()
+func pegaRegistrosDoBanco(w http.ResponseWriter, r *http.Request) {
+    registros := pegaRegistros()
 
-        // Escrever o cabeçalho da resposta
-        w.WriteHeader(http.StatusOK)
-    
-        // Definir o tipo de conteúdo da resposta como JSON
-        w.Header().Set("Content-Type", "application/json")
-    
-        // Codificar os registros em JSON e escrever na resposta
-        json, err := json.Marshal(registros)
-        if err != nil {
-            fmt.Fprintf(w, "Erro ao codificar os registros em JSON: %v", err)
-            return
-        }
-    
-        w.Write(json)
-    })
+    // Escrever o cabeçalho da resposta
+    w.WriteHeader(http.StatusOK)
 
-    http.HandleFunc("/update_registro", editRegistro)
+    // Definir o tipo de conteúdo da resposta como JSON
+    w.Header().Set("Content-Type", "application/json")
 
-    // Registrar a rota DELETE
-    http.HandleFunc("/delete", deleteRegistro)
-
-    // Inicia o servidor na porta 8080
-    http.ListenAndServe(":8080", nil)
+    // Codificar os registros em JSON e escrever na resposta
+    json, err := json.Marshal(registros)
+    if err != nil {
+        fmt.Fprintf(w, "Erro ao codificar os registros em JSON: %v", err)
+        return
+    }
+    w.Write(json)
 }
 
 func pegaRegistros() []Registro {
@@ -53,7 +47,6 @@ func pegaRegistros() []Registro {
         log.Fatal(err)
     }
     defer db.Close()
-
     // Executar uma consulta SQL para recuperar os dados
     rows, err := db.Query("SELECT * FROM diarios")
     if err != nil {
@@ -86,6 +79,62 @@ type DadosDiarios struct {
     Creatina   string `json:"creatina"`
     Lendo       string `json:"lendo"`
     ID         int    `json:"id"`
+}
+
+func inserirRegistro(w http.ResponseWriter, r *http.Request){
+    // Decodificar o corpo da requisição
+body, err := ioutil.ReadAll(r.Body)
+if err != nil {
+    fmt.Fprintf(w, "Erro ao ler o corpo da requisição: %v", err)
+    return
+}
+
+// Criar um novo registro de dados diários
+dados := DadosDiarios{}
+err = json.Unmarshal(body, &dados)
+if err != nil {
+    fmt.Fprintf(w, "Erro ao decodificar o corpo da requisição: %v", err)
+    return
+}
+
+// Retornar o status 201 Created
+w.WriteHeader(http.StatusCreated)
+
+db, err := sql.Open("postgres", "postgres://postgres:689df2c8@localhost:5432/Registros?sslmode=disable")
+if err != nil {
+    log.Fatal(err)
+}
+defer db.Close()
+
+// Criar instrução SQL para atualizar o registro
+stmt, err := db.Prepare("INSERT INTO diarios (data, lembrete, relatoDoDia, treino, aFazer, leujoje, ingles, tirouFoto, creatina, lendo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);")
+if err != nil {
+    log.Fatal(err)
+}
+defer stmt.Close()
+
+// Substituir os valores na instrução SQL
+
+data := dados.Data
+lembrete := dados.Lembrete
+relatoDoDia := dados.RelatoDoDia
+treino := dados.Treino
+aFazer := dados.AFazer
+leuHoje := dados.LeuHoje
+ingles := dados.Ingles
+tirouFoto := dados.TirouFoto
+creatina := dados.Creatina
+lendo := dados.Lendo
+
+// // Executar a instrução SQL e verificar se a atualização foi bem-sucedida
+_, err = stmt.Exec(data, lembrete, relatoDoDia, treino, aFazer, leuHoje, ingles, tirouFoto, creatina, lendo)
+
+// fmt.Println(data, lembrete, relatoDoDia, treino, aFazer, leuHoje, ingles, tirouFoto, creatina, lendo)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println("Registro inserido com sucesso!")
 }
 
 func editRegistro(w http.ResponseWriter, r *http.Request){
@@ -133,8 +182,6 @@ func editRegistro(w http.ResponseWriter, r *http.Request){
     creatina := dados.Creatina
     lendo := dados.Lendo
     id := dados.ID
-
-    // fmt.Println("Dados recebidos:", data, lembrete, relatoDoDia, treino, aFazer, leuHoje, ingles, tirouFoto, creatina, lendo, id)
     
     // // Executar a instrução SQL e verificar se a atualização foi bem-sucedida
     _, err = stmt.Exec(data, lembrete, relatoDoDia, treino, aFazer, leuHoje, ingles, tirouFoto, creatina, lendo, id)
