@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="icon" href="../images/iconver.png" type="image/x-icon" />
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <title>Logar</title>
+  </head>
+  <body>
+    
+    <div style="width: 100vw; height: 100vh">
+      <div class="container">
+        <div style="margin-top: 32vh;">
+            <form action="/login" method="post">
+                <h4>{{ .Mensagem }}</h4>
+          <div class="input-group mt-5 mb-3">
+            <span class="input-group-text" id="basic-addon1">Username</span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Username"
+              aria-label="Username"
+              aria-describedby="basic-addon1"
+              id="username" name="username"
+            />
+          </div>
+          <div class="input-group mb-3">
+            <input
+              type="password"
+              class="form-control"
+              placeholder="Type your password"
+              aria-label="Type your password"
+              aria-describedby="basic-addon2"
+              id="password" name="password"
+            />
+            <span class="input-group-text" id="basic-addon2">Password</span>
+          </div>
+          <p class="mt-1 pb-3" id="error"></p>
+          <button type="button" class="btn btn-secondary ml-2" id="entrar">Entrar</button>
+        </form>
+        </div>
+      </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <script src="/js/main.js" type="application/javascript"></script>
+  </body>
+</html>

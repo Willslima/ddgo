@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"text/template"
+
 	_ "github.com/lib/pq"
-    "github.com/rs/cors"
+	"github.com/rs/cors"
 )
 
 type Registro struct {
@@ -29,17 +31,50 @@ type DadosDiarios struct {
     ID         int    `json:"id"`
 }
 
+type Data struct {
+    Mensagem string
+  }
+
 func main() {
     fmt.Println("Serve is running on http://localhost:8080/ 🚀")
     mux := http.NewServeMux()
     handler := cors.Default().Handler(mux)
 
+    mux.HandleFunc("/js/main.js", func(w http.ResponseWriter, r *http.Request) {
+        // Leia o arquivo JavaScript.
+        data, err := ioutil.ReadFile("main.js")
+        if err != nil {
+            fmt.Fprintf(w, "Erro ao ler o arquivo JavaScript: %v", err)
+            return
+        }
+
+        // Escreva o conteúdo do arquivo JavaScript na resposta HTTP.
+        w.Header().Set("Content-Type", "application/javascript")
+        w.Write(data)
+    })
+
+    mux.HandleFunc("/js/script.js", func(w http.ResponseWriter, r *http.Request) {
+        // Leia o arquivo JavaScript.
+        data, err := ioutil.ReadFile("script.js")
+        if err != nil {
+            fmt.Fprintf(w, "Erro ao ler o arquivo JavaScript: %v", err)
+            return
+        }
+        // Escreva o conteúdo do arquivo JavaScript na resposta HTTP.
+        w.Header().Set("Content-Type", "application/javascript")
+        w.Write(data)
+    })
+
     mux.HandleFunc("/registros", pegaRegistrosDoBanco)     //GET /registros
     mux.HandleFunc("/inserir_registro", inserirRegistro)   //POST /inserir_registro
     mux.HandleFunc("/update_registro", editRegistro)       //POST /update_registro
     mux.HandleFunc("/delete", deleteRegistro)              //POST /delete
+    mux.HandleFunc("/login", loginHandler)
+    mux.HandleFunc("/dia-dia", indexHandler)
+    mux.HandleFunc("/verifica-login", verificaLogin)
     http.ListenAndServe(":8080", handler)                       // Inicia o servidor na porta 8080
 }
+
 
 func pegaRegistrosDoBanco(w http.ResponseWriter, r *http.Request) {
     db, err := sql.Open("postgres", "postgres://postgres:689df2c8@localhost:5432/Registros?sslmode=disable")
@@ -87,7 +122,6 @@ if err != nil {
     fmt.Fprintf(w, "Erro ao ler o corpo da requisição: %v", err)
     return
 }
-
 // Criar um novo registro de dados diários
 dados := DadosDiarios{}
 err = json.Unmarshal(body, &dados)
@@ -225,6 +259,84 @@ id := dados.ID
 _, err = stmt.Exec(id)
 if err != nil {
     log.Fatal(err)
+    }
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+    // Carregar o template
+    t := template.Must(template.ParseFiles("html/template/login.html"))
+  
+    // Criar dados para o template
+    data := Data{
+      Mensagem: "Olá, por favor, faça login.",
+    }
+  
+    // Renderizar o template
+    t.Execute(w, data)
+  }
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+    // Carregar o template
+    t := template.Must(template.ParseFiles("html/template/index.html"))
+  
+    // Renderizar o template
+    t.Execute(w, nil)
+  }
+
+func verificaLogin(w http.ResponseWriter, r *http.Request) {
+    // Decodificar o corpo da requisição
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        fmt.Fprintf(w, "Erro ao ler o corpo da requisição: %v", err)
+        return
+    }
+    
+    type DadosUsuario struct {
+        Usuario string`json:"usuario"`
+        Password string`json:"password"`
+}
+    // Criar um novo registro de dados diários
+    dados := DadosUsuario{}
+    err = json.Unmarshal(body, &dados)
+    if err != nil {
+        fmt.Fprintf(w, "Erro ao decodificar o corpo da requisição: %v", err)
+        return
+    }
+    // Abrir conexão com o banco de dados
+    db, err := sql.Open("postgres", "postgres://postgres:689df2c8@localhost:5432/Registros?sslmode=disable")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+    // Criar instrução SQL para verificar se o usuário existe
+    stmt, err := db.Prepare("SELECT EXISTS (SELECT 1 FROM usuarios WHERE usuario = $1 AND senha = $2);")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer stmt.Close()
+
+    // Substituir os valores na instrução SQL
+    usuario := dados.Usuario
+    password := dados.Password
+
+    // Executar a instrução SQL
+    row := stmt.QueryRow(usuario, password)
+
+    // Verificar o resultado da query
+    var existe bool
+    err = row.Scan(&existe)
+    if err != nil {
+        log.Fatal(err)
+    }
+    // Retornar o resultado para o usuário
+    if existe {
+        // Usuário existe
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, `{"status": true, "mensagem": "Login realizado com sucesso!"}`)
+    } else {
+        // Usuário não existe
+        w.WriteHeader(http.StatusOK)
+        fmt.Fprintf(w, `{"status": false, "mensagem": "Usuário e/ou senha incorretos."}`)
     }
 }
 
