@@ -18,17 +18,17 @@ type Registro struct {
 }
 
 type DadosDiarios struct {
-    Data       string `json:"data"`
-    Lembrete   string `json:"lembrete"`
-    RelatoDoDia string `json:"relato_do_dia"`
-    Treino      string `json:"treino"`
-    AFazer     string `json:"a_fazer"`
-    LeuHoje     string `json:"leu_hoje"`
-    Ingles      string `json:"ingles"`
-    TirouFoto  string `json:"tirou_foto"`
-    Creatina   string `json:"creatina"`
-    Lendo       string `json:"lendo"`
-    ID         int    `json:"id"`
+    Data         string `json:"data"`
+    Lembrete     string `json:"lembrete"`
+    RelatoDoDia  string `json:"relato_do_dia"`
+    Treino       string `json:"treino"`
+    AFazer       string `json:"a_fazer"`
+    LeuHoje      string `json:"leu_hoje"`
+    Ingles       string `json:"ingles"`
+    TirouFoto    string `json:"tirou_foto"`
+    Creatina     string `json:"creatina"`
+    Lendo        string `json:"lendo"`
+    ID           int    `json:"id"`
 }
 
 type Data struct {
@@ -64,7 +64,6 @@ func main() {
         w.Header().Set("Content-Type", "application/javascript")
         w.Write(data)
     })
-
     mux.HandleFunc("/registros", pegaRegistrosDoBanco)     //GET /registros
     mux.HandleFunc("/inserir_registro", inserirRegistro)   //POST /inserir_registro
     mux.HandleFunc("/update_registro", editRegistro)       //POST /update_registro
@@ -74,7 +73,6 @@ func main() {
     mux.HandleFunc("/verifica-login", verificaLogin)
     http.ListenAndServe(":8080", handler)                       // Inicia o servidor na porta 8080
 }
-
 
 func pegaRegistrosDoBanco(w http.ResponseWriter, r *http.Request) {
     db, err := sql.Open("postgres", "postgres://postgres:689df2c8@localhost:5432/Registros?sslmode=disable")
@@ -290,7 +288,7 @@ func verificaLogin(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Erro ao ler o corpo da requisição: %v", err)
         return
     }
-    
+
     type DadosUsuario struct {
         Usuario string`json:"usuario"`
         Password string`json:"password"`
@@ -309,7 +307,7 @@ func verificaLogin(w http.ResponseWriter, r *http.Request) {
     }
     defer db.Close()
     // Criar instrução SQL para verificar se o usuário existe
-    stmt, err := db.Prepare("SELECT EXISTS (SELECT 1 FROM usuarios WHERE usuario = $1 AND senha = $2);")
+    stmt, err := db.Prepare("SELECT EXISTS (SELECT 1 FROM usuarios WHERE usuario = $1 OR email = $1 AND senha = $2);")
     if err != nil {
         log.Fatal(err)
     }

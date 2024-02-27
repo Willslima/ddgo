@@ -196,6 +196,7 @@ function criaDadosNoHtml(registros) {
     const lendoLivroCell = document.createElement('td')
     lendoLivroCell.textContent = registro.Lendo
     const relatoCell = document.createElement('td')
+    relatoCell.setAttribute("colspan","2")
     relatoCell.textContent = registro.RelatoDoDia
 
     const editButton = document.createElement('button')
